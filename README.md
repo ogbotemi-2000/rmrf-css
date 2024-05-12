@@ -8,7 +8,7 @@ ___
 ___
 
 ## Browser-based
-Head over to [site_url] for a more comprehensive, simple, UI-based trimming and downloading of used styles for your provided website URL.
+Head over to [](https://rem-css.infinityfreeapp.com) for a more comprehensive, simple, UI-based trimming and downloading of used styles for your provided website URL.
 
 
 ## Via the command line
@@ -17,13 +17,13 @@ Head over to [site_url] for a more comprehensive, simple, UI-based trimming and 
 git clone https://github.com/ogbotemi-2000/RemCSS.git
 ```
 
-+ Or install the package locally directly via npm
++ Or install the package locally via npm
 
 ```
 npm install remcss
 ```
 
-Both options are quick and direct - the package has zero dependencies, no `npm install` required.
+> Both options above are quick and direct - the package has zero dependencies, no `npm install` required.
 
 ___
 
@@ -32,7 +32,7 @@ ___
 The browser-based version is direct and progressive with short texts when necessary to guide its usage.
 ___
 
-This section comprises guides for using the package programatically
+The section below comprises guides for using the package programatically
 
 ## As a module
 
@@ -55,43 +55,57 @@ rem_css()
 
 ## Via invocation from the command-line
 
-```
-node path/to/remcss/index.js -h 'index.html, 404.html' -c 'tailwind.css, all.css' -o output-folder
-```
++ ### Via `npm run <script> <arguments>`
 
-> The arguments provided above are not hardcoded - you may change them to what you wish in the index.js file
-
-___
-
-The arguments can also be provided in the long version
-```
-node path/to/remcss/index.js --html 'index.html, 404.html' --css 'tailwind.css, all.css' -output output-folder
-```
-> What matters is that the initial letters - 'h', 'c', 'o' in the arguments above remain the same, it can be anything
-
-You may add the following in the `package.json` file to run the `remcss` package via the command-line
+Include the code block below in your `package.json` file for it to work
 ```js
 ...
   "scripts": {
+    ...
     "remcss": "node ./node_modules/remcss/index"
+    ...
   }
-
 ...
 ```
-Execute the script as `npm remcss <arguments here>`
+
+It is invoked as 
+```js
+npm run remcss --args <html file names or folder path> <similar but for css> <output folder>
+```
+An example - `npm run remcss --args 'index.html, sitemap.html' public/css dist`, *--args* can be reworded to anything; even whitespace, and it'll still work fine
+as long as the double dashes in its name remain there.
+
+
++ ### Via `node path/to/remcss/index`
+```js
+node path/to/remcss/index -h index.html -c 'tailwind.css, all.css' -o output-folder
+```
+
+> The arguments '-h', '-c', '-o' provided above are not hardcoded - you may change them to what you wish in the index.js file
+
+
+The arguments can also be provided in the long version
+```js
+node path/to/remcss/index.js --html 'index.html, 404.html' --css 'tailwind.css, all.css' -output output-folder
+```
+
+> The arguments above can be anything, what matters is that their initial letters - 'h', 'c', 'o' remain in the same position
+
+___
 
 
 #License
-___
 
 Distributed under the EPUL License. See 'LICENSE.txt' for more information
 
+___
 
 #Contact
 
 Ogbotemi Ogungbamila 
 
+___
 
 #Acknowledgements
 
-+ [W3C CSS Specification](https://w3c.org)
++ [W3C CSS Specification](https://w3c.org): For the documents from which algorithm used in validating used CSS selectors was created

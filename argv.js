@@ -1,18 +1,27 @@
 /*
-simple utility to set and read command-line arguments using lean code with zero dependencies
+simple utility to define and read command-line arguments using lean code with zero dependencies
 */
 
 const fs      = require('fs'),
       path    = require('path'),
-      argv    = process.argv.slice(2),
+      _argv   = process.argv.slice(2),
+      argv    = [],
       check   = (a, o, i)=>a[i]?.match(o[i/2]),
       values  = {},
-      msgs    =[];
+      msgs    = [];
+
 
 module.exports = function(options, defs, isA) {
-  isA = arg=>Array.isArray(arg);
 
+  isA = arg=>Array.isArray(arg);
   if(!(isA(options)&&isA(defs))) return values;
+
+  /* Add variables before their values. This is to cater for when `npm run remcss` is used.
+   * the minimum number valid arguments and their values cannot be three because at least html and css files or folders will have to be specified
+   * making it at least four it is valid
+   */
+  _argv.length<=3&&_argv.forEach((e, i)=>{argv.push(options[i]), argv.push(e)})
+
   defs.map((e, i)=>values[options[i]]=e);
 
   for(let i = 0, arr=[], value, len=argv.length, match=str=>(str&&=str.match(rgx))[0], rgx=new RegExp('^('+options.map(opt=>'-+'+opt.split('-').pop()).join('|')+')'); i < len;) {

@@ -22,8 +22,7 @@ let fs         = require('fs'),
 
 let fromCmdLine = process.argv.slice(2).length,
 /* argv('array of custom command-line arguments', 'the defaults to apply for each unprovided argument') */
-cmd_args = argv(['-h', '-c', '-o'], ['./', 'css', 'dist']),
-props = ['html', 'css', 'out'], args={};
+cmd_args = argv(['-h', '-c', '-o'], ['./', 'css', 'dist']), props = ['html', 'css', 'out'], args={};
 
 /* create property names supported for the object passed to `init` from the object built from the command-line arguments */
 Object.keys(cmd_args).map((key, i)=>args[props[i]] = cmd_args[key]),
@@ -51,34 +50,39 @@ function init(obj, index, bool, values, files, rgxes, exists) {
   /** the promise below is used to have a callback for continuation whether the shell - 'ls <directory> -a' is spawned or not. 
     * This is usually when a string or an array of filenames to consider is provided as the values of the 'html' and 'css' propeties of obj
     */
-  let getFiles =value=>new Promise((resolve, reject)=>{
+  let getFiles =value=>new Promise((resolve, reject, exit)=>{
+      exit=_=>`::ENOENT:: for the fallback \`${value}\` - cannot continue, exiting the remcss module`;
      /* (value=exists[index]).length below has the ubiquity of being a truthy or falsy for both arrays and strings - convenient */
       if((value=exists[index]).length) resolve([].concat(value));
 
-      /** the option to read filenames via `ls` below faces ENOENT issues when ran in a Windows terminal, it is advisable to run it in linux shell
-       *  the first logical operation below is to only warn about using fallbacks when necessary
+       /*  the first logical operation below is to only warn about using fallbacks when necessary
        */
       else {
 	!value&&console.warn('::ENOENT:: For the value of the property',`\`${props[index]}\``,'of the expected object argument - reading', props[index].toUpperCase(), 'files from directory',`\`${value=values[index]}\``,'as a fallback');
 	value=values[index];
 
 	/*reject and exit obtaining the necessary files if the fallbacks do not exist*/
-	if(!fs.existsSync(value)) {reject(`::ENOENT:: for the fallback \`${value}\` - cannot continue, exiting the remcss module`); return}
+	if(!fs.existsSync(value)) {reject(exit()); return}
 
 	execFile('ls', [value], (error, stdout, stderr) => {
-          if (error) throw error;
+          if (error) console.warn(error)/* warning instead of 'throw'ing this error.
+	   this error occurs when the control statements get here from running the code via a Windows terminal
+	  */;
+
 	  /*split and filter strings that match this regex /\.css$/ or /\.html$/ */
-          resolve(stdout.split('\n').filter(e=>rgxes[index].test(e)))
+          
+	  (stdout=stdout.split('\n').filter(e=>rgxes[index].test(e))).length ? resolve(stdout) : reject(exited=exit());
         })
       }
     }).then(provided=>{
       files[props[index]] = provided, index++,
       /** +1 below makes it stop at the element just before the last element, which is the output directory, in the values array */
       index+1<values.length?getFiles(index):/*Done, continue, start from 0*/fxn(0, files, values.pop())
-   }).catch(console.log);
 
-  getFiles(index);
+   }).catch(msg=>{console.log(msg), exited=true}), exited;
+
+  !exited&&getFiles(index);
 }
 
-//Invoked in-file during development
-init({html:'index.html', css:'css'})
+// Invoked in-file during development
+// init({html:'index.html', css:'css'})
