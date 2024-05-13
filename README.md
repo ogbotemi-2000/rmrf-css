@@ -1,17 +1,17 @@
-# RemCSS
+## RemCSS
 
 A much leaner and quicker npm package for trimming unused CSS from CSS files based on the selectors matched in provided HTML files
 
 
-## Getting Started
+### Getting Started
 
 
-### Browser-based
+#### Browser-based
 Head over to [https://rem-css.infinityfreeapp.com](https://rem-css.infinityfreeapp.com) for a more comprehensive, simple, UI-based trimming and downloading of used styles for your provided website URL.
 
 ___
 
-### Via the command line
+#### Via the command line
 + Clone the repository
 ```
 git clone https://github.com/ogbotemi-2000/RemCSS.git
@@ -26,14 +26,14 @@ npm install remcss
 _Both options above are quick and direct - the package has zero dependencies, no `npm install` required_
 
 
-## Usage
+### Usage
 
 The browser-based version is direct and progressive with short texts when necessary to guide its usage.
 
 
 The section below comprises guides for using the package programatically
 
-## As a module
+#### As a module
 
 ```js
 const rem_css = require('remcss');
@@ -53,9 +53,9 @@ rem_css()
 ```
 ___
 
-## Via invocation from the command-line
+#### Via invocation from the command-line
 
-+ ### Via `npm run <script> <arguments>`
++ ##### Via `npm run <script> <arguments>`
 
 Include the code block below in your `package.json` file for it to work
 ```js
@@ -76,7 +76,7 @@ An example - `npm run remcss --args 'index.html, sitemap.html' public/css dist`,
 as long as the double dashes in its name remain there.
 
 
-+ ### Via `node path/to/remcss/index`
++ ##### Via `node path/to/remcss/index`
 ```js
 node path/to/remcss/index -h index.html -c 'tailwind.css, all.css' -o output-folder
 ```
@@ -91,23 +91,24 @@ node path/to/remcss/index.js --html 'index.html, 404.html' --css 'tailwind.css, 
 
 
 
-## License
+### License
 
 Distributed under the EPUL License. See 'LICENSE.txt' for more information
+
 Copyright © 2024 [Ogbotemi Akin Ogungbamila](https://github.com/ogbotemi-2000)
 
 
-## Discuss
+### Discuss
 
 [Discussions are welcome!](https://github.com/ogbotemi-2000/RemCSS/discussions/)
 
-## Author
+### Contact
 
 Ogbotemi Akin Ogungbamila
 
 + Twitter: [@ogbotemi_o](https://twitter.com/ogbotemi_o)
++ Email: [ogungbamila](mailto:ogungbamilaogbotemi@gmail.com)
 
-
-## Acknowledgements
+### Acknowledgements
 
 + [W3C CSS Specification for selectors](https://www.w3.org/TR/selectors-3/#sequence): For the documents from which the algorithm used in validating used CSS selectors was created
