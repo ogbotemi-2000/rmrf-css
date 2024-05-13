@@ -23,7 +23,7 @@ git clone https://github.com/ogbotemi-2000/RemCSS.git
 npm install remcss
 ```
 
-> Both options above are quick and direct - the package has zero dependencies, no `npm install` required.
+_Both options above are quick and direct - the package has zero dependencies, no `npm install` required_
 
 
 ## Usage
@@ -94,11 +94,17 @@ node path/to/remcss/index.js --html 'index.html, 404.html' --css 'tailwind.css, 
 ## License
 
 Distributed under the EPUL License. See 'LICENSE.txt' for more information
+Copyright © 2024 [Ogbotemi Akin Ogungbamila](https://github.com/ogbotemi-2000)
 
 
-#Contact
+## Discuss
 
-Ogbotemi Ogungbamila 
+[Discussions are welcome!](https://github.com/ogbotemi-2000/RemCSS/discussions/)
+
+## Author
+
+Ogbotemi Akin Ogungbamila
++ Twitter: [@ogbotemi_o](https://twitter.com/ogbotemi_o)
 
 
 ## Acknowledgements
