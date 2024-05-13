@@ -1,4 +1,5 @@
-const fs = require('fs');
+const fs   = require('fs'),
+      path = require('path');
 
 module.exports = trimCSS;
 function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comments=[], css='', ruleEnd, used='', rkeys, file, vw_breaks, styles, fn, endDump={}, dump={}) {
@@ -17,8 +18,8 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
         if((value=dump[i]).replace(/@[^{]+\{/, '')) used+=value+(endDump[i]||'')
       }
 
-      file = file.split('/').pop(), fs.writeFileSync(outDir+'/'+file, used), fs.writeFileSync(outDir+'/_'+file, css),
-      console.log('::DONE WRITING::')
+      file = file.split(/(\/|\\)+/).pop(), fs.writeFileSync(path.join(outDir, file), used), fs.writeFileSync(path.join(outDir,'/_'+file), css),
+      console.log('::DONE WRITING::', file)
     },
     
     fn=()=>{
@@ -34,7 +35,8 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
         for(let jump=0, boost=50000; jump<boost&&(each = styles.charAt(index)); jump++) {
           
           /**change 20000 to any number to limit console logging to its multiples  */
-          index&&index/20000 === Math.round(index/20000)&&console.log('::MATCHING.INDEX::', index, loop(styles, {from:index, to:10})[0], styles.length);
+          //index&&index/20000 === Math.round(index/20000)&&console.log('::MATCHING.INDEX::', index, loop(styles, {from:index, to:10})[0], styles.length);
+
           /** The switch statement below makes the algorith overlook comments for now.
            * This is desired because removing comments will be done first in the future release of this codebase.
            * Overlooking comments has to be done as it is below to avoid storing matching @-rule strings
@@ -113,9 +115,9 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
               at_rule?dump[at_rule]&&(dump[at_rule]+=res):(
 
               /** the logical statement and the if clause below is to consider utility classes for media query breakpoints and dump them together in the dump object */
-              /* rclass&&(dump[brkpt=vw_breaks[rclass=rclass[0].replace('\\:', '')]])
+              rclass&&(dump[brkpt=vw_breaks[rclass=rclass[0].replace('\\:', '')]])
               ? dump[brkpt]+=res
-              : */ used+=res),
+              : used+=res),
 
               /* jump ahead of the closing curly brace pointed to by forward[1] */
               index=forward[1],
@@ -135,15 +137,12 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
           index++;
           /** at the loop's end */
         }
-      if(index>len-1) console.timeEnd('LOOP'), end, console.log('::DONE::', index, [used, css].map(e=>e.length));
+      if(index>len-1) console.log('::TRIMMED::', file, '::WRITING::', file, 'to', outDir), console.timeEnd('DONE IN:'), end(), /* called fn again to concurrently trim each .css file */ i<files.length?fn():console.log(`::TRIMMED:: All ${i} CSS files(s)`);
       /** call this entire code again using a Node's lifecycle method among which setImmediate performed fastest in benchmarks and thus is used */
       else setImmediate(_=>rerun())
     },
     /** called once to run */
-    console.time('LOOP'), rerun()
-
-    /* called back to sequentially trim each .css file */
-    //i<files.length&&fn()
+    console.time('DONE IN:'), rerun()
     },
     // init
     fn()

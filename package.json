@@ -8,7 +8,7 @@
     "start": "node test",
     "remcss": "node index"
   },
-  "keywords": ['trimming', 'unused', 'CSS', 'styles', 'module', 'independent'],
+  "keywords": ["trimming", "unused", "CSS", "styles", "module", "independent"],
   "author": "Ogbotemi Akin Ogungbamila",
   "license": "EUPL"
 }
