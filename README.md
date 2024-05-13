@@ -9,7 +9,7 @@ A much leaner and quicker npm package for trimming unused CSS from CSS files bas
 ### Browser-based
 Head over to [https://rem-css.infinityfreeapp.com](https://rem-css.infinityfreeapp.com) for a more comprehensive, simple, UI-based trimming and downloading of used styles for your provided website URL.
 
-__
+___
 
 ### Via the command line
 + Clone the repository
@@ -30,7 +30,6 @@ npm install remcss
 
 The browser-based version is direct and progressive with short texts when necessary to guide its usage.
 
-__
 
 The section below comprises guides for using the package programatically
 
@@ -52,6 +51,7 @@ rem_css({
 rem_css()
 
 ```
+___
 
 ## Via invocation from the command-line
 
@@ -81,8 +81,6 @@ as long as the double dashes in its name remain there.
 node path/to/remcss/index -h index.html -c 'tailwind.css, all.css' -o output-folder
 ```
 
-> The arguments '-h', '-c', '-o' provided above are not hardcoded - you may change them to what you wish in the index.js file
-
 
 The arguments can also be provided in the long version
 ```js
@@ -105,4 +103,4 @@ Ogbotemi Ogungbamila
 
 ## Acknowledgements
 
-+ [W3C CSS Specification for selectors](https://www.w3.org/TR/selectors-3/#sequence): For the documents from which algorithm used in validating used CSS selectors was created
++ [W3C CSS Specification for selectors](https://www.w3.org/TR/selectors-3/#sequence): For the documents from which the algorithm used in validating used CSS selectors was created
