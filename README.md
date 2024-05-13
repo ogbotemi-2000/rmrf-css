@@ -1,17 +1,17 @@
 # RemCSS
 
 A much leaner and quicker npm package for trimming unused CSS from CSS files based on the selectors matched in provided HTML files
-___
 
 
-# Getting Started
-___
-
-## Browser-based
-Head over to [](https://rem-css.infinityfreeapp.com) for a more comprehensive, simple, UI-based trimming and downloading of used styles for your provided website URL.
+## Getting Started
 
 
-## Via the command line
+### Browser-based
+Head over to [https://rem-css.infinityfreeapp.com](https://rem-css.infinityfreeapp.com) for a more comprehensive, simple, UI-based trimming and downloading of used styles for your provided website URL.
+
+__
+
+### Via the command line
 + Clone the repository
 ```
 git clone https://github.com/ogbotemi-2000/RemCSS.git
@@ -25,12 +25,12 @@ npm install remcss
 
 > Both options above are quick and direct - the package has zero dependencies, no `npm install` required.
 
-___
 
-# Usage
+## Usage
 
 The browser-based version is direct and progressive with short texts when necessary to guide its usage.
-___
+
+__
 
 The section below comprises guides for using the package programatically
 
@@ -89,23 +89,20 @@ The arguments can also be provided in the long version
 node path/to/remcss/index.js --html 'index.html, 404.html' --css 'tailwind.css, all.css' -output output-folder
 ```
 
-> The arguments above can be anything, what matters is that their initial letters - 'h', 'c', 'o' remain in the same position
-
-___
+> The arguments above can be anything, what matters is that their initial letters - 'h', 'c', 'o' as speciified in the `index.js` file remain in the same position
 
 
-#License
+
+## License
 
 Distributed under the EPUL License. See 'LICENSE.txt' for more information
 
-___
 
 #Contact
 
 Ogbotemi Ogungbamila 
 
-___
 
-#Acknowledgements
+## Acknowledgements
 
-+ [W3C CSS Specification](https://w3c.org): For the documents from which algorithm used in validating used CSS selectors was created
++ [W3C CSS Specification for selectors](https://www.w3.org/TR/selectors-3/#sequence): For the documents from which algorithm used in validating used CSS selectors was created
