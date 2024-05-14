@@ -86,6 +86,3 @@ function init(obj, index, bool, values, files, rgxes, exists) {
 
   !exited&&getFiles(index);
 }
-
-// Invoked in-file during development
-// init({html:'index.html', css:'css'})

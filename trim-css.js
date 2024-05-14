@@ -1,39 +1,40 @@
-const fs   = require('fs'),
+	const fs   = require('fs'),
       path = require('path');
 
 module.exports = trimCSS;
 function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comments=[], css='', ruleEnd, used='', rkeys, file, vw_breaks, styles, fn, endDump={}, dump={}) {
-    /** vw_breaks may be provided by the user when the normal media query matching preset below fails to considers the media query classnames */
+
+    /** vw_breaks may be provided by the user when the normal media query matching preset below fails to put utility media query selectors in their media query breakpoints */
     rkeys = new RegExp('('+Object.keys(vw_breaks = {base:500,sm:640,md:768,lg:1024,xl:1280, '32xl':1536}).join('|')+')\\\\:'),
 
     !fs.existsSync(outDir)&&fs.mkdirSync(outDir),
     end=_=>{
       matches.forEach(match=>{
         attrs.delete(match)
-      }), fs.writeFileSync(outDir+'/matched.txt', [...matches].join('\n')),
-      fs.writeFileSync(outDir+'/unmatched.txt', [...attrs].join('\n'));
-  
+      }), fs.writeFileSync(path.join(outDir, 'matched.txt'), [...matches].join('\n')),
+      fs.writeFileSync(path.join(outDir, 'unmatched.txt'), [...attrs].join('\n'));
+
       for(let i in dump) {
         let value;
         if((value=dump[i]).replace(/@[^{]+\{/, '')) used+=value+(endDump[i]||'')
       }
 
       file = file.split(/(\/|\\)+/).pop(), fs.writeFileSync(path.join(outDir, file), used), fs.writeFileSync(path.join(outDir,'/_'+file), css),
-      console.log('::DONE WRITING::', file)
+      console.log('::DONE WRITING::', path.join(outDir, file))
     },
-    
+
     fn=()=>{
       used='', css='', styles = fs.readFileSync(file=files[i++]).toString();
       console.log('::TRIMMING::', file);
 
       let _canAdd=!0, canAdd=!0, at_rule, index=0, each, len=styles.length; each = styles.charAt(index); index<len;
-      
+
       rerun=(each)=>{
       /** the for loop below is used to boost the speed of the trimming algorithm.
-       * It is in bytes per run and defaults to 1
+       * It is in bytes per run and defaults to 1. It may be left as is below as a default or exposed as `--boost <N>`
        */
-        for(let jump=0, boost=50000; jump<boost&&(each = styles.charAt(index)); jump++) {
-          
+        for(let jump=0, boost=500000; jump<boost&&(each = styles.charAt(index)); jump++) {
+
           /**change 20000 to any number to limit console logging to its multiples  */
           //index&&index/20000 === Math.round(index/20000)&&console.log('::MATCHING.INDEX::', index, loop(styles, {from:index, to:10})[0], styles.length);
 
@@ -46,7 +47,7 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
             case '/*': _canAdd=0; break;
             case '*/': _canAdd=!0; break;
           }
-          
+
           if(_canAdd&&each==='@') {
             let temp='', res='', add=0, kFrame, added='';
 
@@ -87,7 +88,7 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
 
           //update 'each' for when index gets increased to 'jump' over the @-rules matched above
           canAdd&&(css+=each=styles.charAt(index)), canAdd=!0;
-          
+
           /** The first regex considers only class or id selectors. The second regex test is to prevent matches like .5px in 0.5px.
            *  No worries, selectors that start with a number have to be escaped to be valid i.e .\32xl
            */
@@ -100,7 +101,7 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
              * 2nd part: checks whether the selector in question is standalone; it does not exist as a string in another selector
             */
             if(attr===to[0]&&!/[\\0-9A-Za-z_-]/.test(styles.charAt(to[1]+1))) {
-                matches.add(attr);
+              matches.add(attr);
               /** the callback: _cb is used by back and forward to loop over the stylesheet at the current index until
                * its start or until either an opening or closing curly brace is encountered
                */
@@ -111,7 +112,7 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
               /** the use of .repeat below is for formatting purposes only */
               res='\n'.repeat(!back.match('\n'))+back+attr+forward[0], rclass=res.match(rkeys), brkpt;
 
-              /** add to the dump for @-rules if the current matched selector is is one, this is usually a media rule */
+              /** add to the dump for media  @-rules if the current matched selector is in one, this is usually a media rule */
               at_rule?dump[at_rule]&&(dump[at_rule]+=res):(
 
               /** the logical statement and the if clause below is to consider utility classes for media query breakpoints and dump them together in the dump object */
@@ -127,30 +128,32 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
             }
           });
           /** for every closing curly brace, check if it is the end of a nested @-rule and dump the strings that end it in endDump only to
-           * build them by adding the contents of dump and endDump together at the end of the loop
+           * build them by adding the contents of dump and endDump together by calling end() at the end of the loop
            */
-          if(styles.charAt(index)==='}') at_rule&&(ruleEnd=atRuleEnd(styles, index))[0]&&(endDump[at_rule]=ruleEnd[2], at_rule=0);
-          
+          if(at_rule&&styles.charAt(index)==='}') (ruleEnd=atRuleEnd(styles, index))[0]&&(endDump[at_rule]=ruleEnd[2], at_rule=0);
+
           /** increment index at the end of it all, this is particularly important because the algorithm above requires that
            * styles.indexOf(styles.charAt(index)) equals index. Moving it to the start of the loop may cause bugs
            */
           index++;
-          /** at the loop's end */
         }
-      if(index>len-1) console.log('::TRIMMED::', file, '::WRITING::', file, 'to', outDir), console.timeEnd('DONE IN:'), end(), /* called fn again to concurrently trim each .css file */ i<files.length?fn():console.log(`::TRIMMED:: All ${i} CSS files(s)`);
-      /** call this entire code again using a Node's lifecycle method among which setImmediate performed fastest in benchmarks and thus is used */
+      if(index>len-1) console.timeEnd('::TRIMMED:: '+file+' in:'), end(), /* called fn again to concurrently trim each .css file */ i<files.length?fn():(console.log(`\n::TRIMMED:: ${i} CSS files(s)\n`),
+	/* part of the body of the if statement above, writes a set of the used selectors to a selectors.txt */
+	fs.writeFile(path.join(outDir, 'selectors.txt'), 'new Set(['+[...attrs].filter(e=>e.trim()).map(e=>`"${e}"`)+'])',
+	  _=>console.log(`Wrote a Set of the likely used CSS selectors detected in the HTML file(s) to ${path.join(outDir, 'selectors.txt')}. You may go to end of the trim-css.js file in the remcss package to learn about its significance\n`)));
+
+      /** call this entire code again using a Nodejs lifecycle method among which setImmediate performed fastest in benchmarks and thus is used */
       else setImmediate(_=>rerun())
     },
     /** called once to run */
-    console.time('DONE IN:'), rerun()
+    console.time('::TRIMMED:: '+file+' in:'), rerun()
     },
     // init
     fn()
   }
-  
+
   /** looks ahead about twice or thrice to know when a closing curly brace has another after it.
-   * The condition for the loop terminates when a non-whitespace character like '}' is encountered after the first closing brace.
-   * If the non-whitespace character is not a '}'
+   * The condition for the loop terminates when a non-whitespace character like '}' is encountered after the first closing brace
    */
 const atRuleEnd=(styles, index, exit_rule, res='', arr)=>(arr = loop(styles, { from:index, cb:(s,f, t, bool)=>(bool=!(t=s[++index]||s[--index]).match(/\s/), res+=s[f], exit_rule=t==='}', bool)}), [exit_rule, index, res]);
 
@@ -183,6 +186,23 @@ function loop(str, props, from, to, cb) {
   return result
 }
 
-// trimCSS(
-//  new Set(["inline-block","border-b","border-current","align-bottom","ripple","p-1","relative","pb-0","font-semibold","mb-2","\\[\\&\\>\\*\\]\\:p-2","rounded-l-lg","border-2","border-r-2","border-gray-400","hover\\:bg-gray-200","rounded-r-lg","border-l-2","mx-1","border-gray-600","rounded-lg","p-2","px-4","mb-4","text-gray-900","bg-blue-100","align-middle","rounded","px-3","ml-2","fa","fa-external-link-alt","text-sm","font-bookweb","${e?","border-0","transform","bg-green-200","h-full","absolute","inset-0","-left-2","-right-2","truncate","mr-4","border","p-0\\.5","px-2\\.5","border-transparent","hover\\:border-current","text-base","mr-3","my-2","text-black","text-xs","to-fro","bg-blue-200","${e\\.length\\>40?","mx-2","ef94-4e32-4d5b-ac04-f297fc564b23","mb-10","pt-14","text-center","px-10","\\[\\&\\>\\*\\]\\:inline-block","\\[\\&\\>\\*\\]\\:text-left","m-auto","md\\:w-full","lg\\:w-5\\/6","sm\\:w-5\\/6","bg-white","text-left","tooltip","no-hover","no-focus-within","no-focus","slide-y","hidden","right-1\\/4","bottom-3","rounded-tr-xl","p-3","text-gray-600","lg\\:mb-7","\\[\\&amp;\\>\\*\\]\\:inline-block","\\[\\&amp;\\>\\*\\]\\:align-middle","sm\\:w-96","mr-2","mb-5","w-full","md\\:w-2\\/3","lg\\:w-1\\/3","mt-2","rounded-md","bg-gradient-to-br","from-gray-200","via-transparent","p-4","mt-3","xl\\:mr-10","left-0","text-gray-700","ml-1","mb-1","\\[\\&\\>\\*\\]\\:align-middle","\\[\\&\\>\\*\\]\\:rounded-full","mb-1\\.5","-slide-y","sm\\:w-auto","sm\\:mr-4","bg-inherit","__class__","focus\\:bg-yellow-300","hover\\:bg-yellow-100","rounded-t-xl","border-l","border-r","border-t","pt-2","mt-1","leading-8","placeholder-gray-700","sm\\:w-80","focus\\:bg-blue-100","sm\\:mr-0","sm\\:inline-block","sm\\:px-4","rounded-tr-md","rounded-bl-md","text-gray-800","sm\\:-mb-1","bg-transparent","outline-none","mb-3","-mt-1","pt-3","border-r-0","border-t-0","rounded-bl-xl","mt-5","m-2","sm\\:mr-5","rounded-inherit","inset-0\\.5","border-gray-500","rounded-tl-xl","p-10","top-0","-m-1","rounded-br-xl","bottom-0","right-0","space-y-1\\.5","ml-0\\.5","my-3","pointer-events-none","decorate","overflow-hidden","duration-500","origin-bottom-right","-right-6","top-3\\/4","shadow","rounded-full","transform-gpu","scale-150","origin-top-left","-left-6","bottom-3\\/4","bg-blue-300","px-6","sm\\:text-sm","leading-6","border-b-0","word-break","mr-8","notify","border-blue-300","mt-4","-slide","show","\\[\\&\\>\\*\\]\\:overflow-hidden","\\[\\&\\>\\*\\]\\:relative","bg-yellow-500","mr-1\\.5","fa-play","border-gray-300","pl-1","bg-gray-100","px-5","fa-chevron-left","to-top","fa-chevron-right","bulge-center","font-mono","w-px","mx-6","h-20","-left-5","top-1\\/3","md\\:mt-0","-top-6","rounded-br-lg","border-b-2","placeholder-gray-600","rounded-bl-lg","w-24","mr-3\\.5","sm\\:mt-1","p-2\\.5","hover\\:bg-gray-100","focus\\:bg-gray-300","fa-fast-forward","p-1\\.5","whitespace-pre","to-bottom","downloadCSS","mt-10","\\[\\&amp;\\>\\*\\]\\:align-bottom","\\[\\&amp;\\>\\*\\]\\:relative","ml-4","rounded-br","border-l-0","-mx-px","rounded-t","-ml-1","rounded-b","rounded-tl","mt-16","\\[\\&\\>\\*\\]\\:align-top","sm\\:w-9_20","tracking-wide","sm\\:mb-0","overflow-y-scroll","bordrer-current","-top-8","mx-10","top-20","sm\\:w-1\\/2","compact","focus\\:outline-none","block","opacity-50","h-1\\/2","w-5","w-30","text-gray-500","left-1","w-1\\/2","mx-auto","sm\\:inline-flex","sm\\:mx-6","sm\\:my-0","my-5","sm\\:h-20","sm\\:w-px","h-px","flex","items-center","justify-center","file","fa-upload","bytes","KB","MB","from","to","cb","function","back","div","color","rgba","data-ripple-scale","data-ripple-opacity","mousedown","import","keyframes","charset","font-face","property","32xl","@media","@import","download","undefined","click","textContent","classList","previousSibling","nextSibling","lastChild","firstChild","nextElementSibling","previousElementSibling","parentNode","lastElementChild","childNodes","firstElementChild","add","remove","base","sm","md","lg","xl",":show","data-className","clicked","fluid","DOMContentLoaded","Array","Object","object","String","unused-css","lEC","cL","input","fEC","or","code","nES","load","error","on","green","red","bg-red-200","GET","stroked-light-border","all","done","pES","disabled","from-yellow-300","ing","ed","bg-yellow-200","lC","class","id","pN","aside","FAVICON","css","js","h4","Found","No","text-red-600"])
-// )
+/*::::::::::::PARDON:::::::::::::::::*/
+
+/*If this algorithm is performing slowly - over 11 seconds when you use `npm run remcss ...`, go to your desired output folder: defaults to dist,
+open the selectors.txt file and replace the Set below with the one in the file. Also replace 'tailwind.min.css' with the path to the CSS file you want
+
+Uncomment the code below and enter `node trim-css` on the terminal - this algorithm runs much more faster then.
+
+This slow behaviour usually occurs for large files like `tailwind.min.css` when using `npm run remcss ...`.
+
+Strangely though, following the steps above and making alterations below does the same thing `npm run remcss ...` does, yet it performs much more faster than it.
+It is as though Node offers more runtime memory for scripts that call their exported functions in themselves as done below, than it does for scripts that export
+their functions as modules to where they are "require"d
+
+
+This may be an issue to speak about to the Node.js contributors and community
+*/
+
+//trimCSS(
+// new Set([]),
+//['tailwind.min.css'], 'dist')
