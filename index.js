@@ -1,6 +1,7 @@
 let fs         = require('fs'),
     path       = require('path'),
-    {execFile} = require('child_process'),
+    {exec,
+    execFile} = require('child_process'),
     attrs      = new Set(['']/**you may leave an array classes or ids used in scripts here - [<class>, <id>]*/),
     index      = 0,
     trimCSS    = require('./trim-css'),
@@ -21,6 +22,11 @@ let fs         = require('fs'),
       index<files.html.length?setImmediate(_=>fxn(index++, files, outDir)):trimCSS(attrs, files.css, outDir)
   });
 
+/*
+The codes below up to module.exports = init is for receiving user input.
+You may comment it up to that point and call init({html:<string>, css:<string>, out:<string>}) if command-line use is not an option
+*/
+
 let fromCmdLine = process.argv.slice(2).length,
 /* argv('array of custom command-line arguments', 'the defaults to apply for each unprovided argument') */
 cmd_args = argv(['-h', '-c', '-o'], ['./', 'css', 'dist']), props = ['html', 'css', 'out'], args={};
@@ -36,7 +42,7 @@ fromCmdLine&&init(args)
 
 module.exports = init;
 
-function init(obj, index, bool, values, files, rgxes, exists) {
+function init(obj, index, bool, values, files, rgxes, exists, fileNames=[]) {
   /* values below represent the fallbacks to be used for non-existent files or folders*/
   values=['./', 'css', 'dist'], files={}, rgxes=[], exists=[],
 
@@ -64,14 +70,17 @@ function init(obj, index, bool, values, files, rgxes, exists) {
 
       /*reject and exit obtaining the necessary files if the fallbacks do not exist*/
       if(!fs.existsSync(value)) {reject(exit()); return}
+      /* using exec to overcome issues with Windows terminal */
+      exec('ls '+value, (error, stdout, stderr, dir) => {
+        if (error) console.warn(/*throw */error) /* a warning instead of 'throw'ing this error */;
 
-      execFile('ls', [value], (error, stdout, stderr, dir) => {
-        if (error) console.warn(/*throw */error) /* a warning instead of 'throw'ing this error.
-	      * this error occurs from running the code via a Windows terminal
-	      */;
-
-	/*split and filter strings that match this regex /\.css$/ or /\.html$/ */
-        (stdout=stdout.split('\n').filter(e=>rgxes[index].test(e))).length
+	/* split and filter strings that match this regex /\.css$/ or /\.html$/.
+	 * The verbosity of using replace below is to properly retrieve the file names from the output of the program
+	 */
+	stdout.replace(/\s[^]+\.(html|css)/g, str=>{
+	  fileNames = [...str.split(/\s+/).filter(e=>e&&/\.(html|css)/.test(e))]
+	}),
+        (stdout=fileNames.filter(e=>rgxes[index].test(e))).length
         /** add full path present in folders provided to their contents */
         ? resolve(stdout.map(e=>path.join(!rgxes[index].test(value)?value:'', e)))
         : reject(exited=exit());

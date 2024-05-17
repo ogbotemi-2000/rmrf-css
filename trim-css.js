@@ -24,7 +24,8 @@ function trimCSS(attrs, files, outDir, end, rerun, i=0, matches=new Set, comment
     },
 
     fn=()=>{
-      used='', css='', styles = fs.readFileSync(file=files[i++]).toString();
+      /** added a newline to the end of the stylesheet to accommodate adding closing braces for @-rules whose closing braces ends the string */
+      used='', css='', styles = fs.readFileSync(file=files[i++]).toString()+'\n';
       console.log('::TRIMMING::', file);
 
       let _canAdd=!0, canAdd=!0, at_rule, index=0, each, len=styles.length; each = styles.charAt(index); index<len;
