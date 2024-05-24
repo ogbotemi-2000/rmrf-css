@@ -88,6 +88,10 @@ node path/to/remcss/index.js --html 'index.html, 404.html' --css 'tailwind.css, 
 
 > The arguments above can be anything, what matters is that their initial letters - 'h', 'c', 'o' as speciified in the `index.js` file remain in the same position
 
+### Caveats
+
+1. Regular expressions of this form `[^, }]+\}` appears to perform less thoroughly in Node.js than in the browser, use the browser-based version of this code for a comprehensive removal of unused styles
+2. A performance drop may be detected by the package for large CSS files of over 1MB, follow the prompts it shows to use an alternative workaround 
 
 
 ### License
