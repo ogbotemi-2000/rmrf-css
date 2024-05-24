@@ -27,24 +27,28 @@ The codes below up to module.exports = init is for receiving user input.
 You may comment it up to that point and call init({html:<string>, css:<string>, out:<string>}) if command-line use is not an option
 */
 
-let fromCmdLine = process.argv.slice(2).length,
-/* argv('array of custom command-line arguments', 'the defaults to apply for each unprovided argument') */
-cmd_args = argv(['-h', '-c', '-o'], ['./', 'css', 'dist']), props = ['html', 'css', 'out'], args={};
+let fromCmdLine = process.argv.slice(2).length, values,
+/* argv('array of custom command-line arguments', 'the defaults to apply for each unprovided argument')
+  * Change the index of the variables and their defaults to change their order on the command line without issues
+  * values below represent the fallbacks to be used for non-existent files or folders
+  */
+cmd_args = argv(['-h', '-c', '-o'], values=['./', 'css', 'dist']), props = ['html', 'css', 'out'], args={};
 
-/* create property names supported for the object passed to `init` from the object built from the command-line arguments */
-Object.keys(cmd_args).map((key, i)=>args[props[i]] = cmd_args[key]),
-
-/*properly store comma separated values as arrays*/
-Object.keys(args).forEach((key, arr)=>args[key]=(arr=args[key].split(',')).length>1?arr:arr[0])
+Object.keys(cmd_args).forEach((_key, key)=>{
+  key = _key.replace(/^-+/, '').charAt(0),
+  
+  (key = props.find(prop=>prop.charAt(0)===key))
+  &&(args[key] = cmd_args[_key])
+}),
 
 /* detect and run init if this file's contents is invoked by node on the command-line with characters like arguments supplied after it */
 fromCmdLine&&init(args)
 
+
 module.exports = init;
 
-function init(obj, index, bool, values, files, rgxes, exists, fileNames=[]) {
-  /* values below represent the fallbacks to be used for non-existent files or folders*/
-  values=['./', 'css', 'dist'], files={}, rgxes=[], exists=[],
+function init(obj, index, bool, files, rgxes, exists, fileNames=[]) {
+  files={}, rgxes=[], exists=[],
 
   /* for when obj is null */ obj||={},
   /* heads up, typeof null equals 'object' hence why the above logical assignment is there*/

@@ -70,10 +70,9 @@ Include the code block below in your `package.json` file for it to work
 
 It is invoked as 
 ```js
-npm run remcss --args <html file names or folder path> <similar but for css> <output folder>
+npm run remcss -- <html file names or folder path> <similar but for css> <output folder>
 ```
-An example - `npm run remcss --args 'index.html, sitemap.html' public/css dist`, *--args* can be reworded to anything; even whitespace, and it'll still work fine
-as long as the double dashes in its name remain there.
+An example - `npm run remcss -- 'index.html, sitemap.html' public/css dist`, the double dashes are required for proper behaviour
 
 
 + ##### Via `node path/to/remcss/index`
@@ -107,7 +106,6 @@ Copyright © 2024 [Ogbotemi Akin Ogungbamila](https://github.com/ogbotemi-2000)
 Ogbotemi Akin Ogungbamila
 
 + Twitter: [@ogbotemi_o](https://twitter.com/ogbotemi_o)
-+ Email: [ogungbamila](mailto:ogungbamilaogbotemi@gmail.com)
 
 ### Acknowledgements
 
