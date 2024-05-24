@@ -70,9 +70,9 @@ Include the code block below in your `package.json` file for it to work
 
 It is invoked as 
 ```js
-npm run remcss -- <html file names or folder path> <similar but for css> <output folder>
+npm run remcss -- -html <html file names or folder path> -css <similar but for css> -out <output folder>
 ```
-An example - `npm run remcss -- 'index.html, sitemap.html' public/css dist`, the double dashes are required for proper behaviour
+An example - `npm run remcss -- -h 'index.html, sitemap.html' -c public/css -o dist`, the double dashes are required for proper behaviour
 
 
 + ##### Via `node path/to/remcss/index`
@@ -86,12 +86,17 @@ The arguments can also be provided in the long version
 node path/to/remcss/index.js --html 'index.html, 404.html' --css 'tailwind.css, all.css' -output output-folder
 ```
 
-> The arguments above can be anything, what matters is that their initial letters - 'h', 'c', 'o' as speciified in the `index.js` file remain in the same position
+> The arguments above can be anything, what matters is that their initial letters - 'h', 'c', 'o' as speciified in the `index.js` file remain in the same position:
+```js
+
+... argv(['-h', '-c', '-o'], ['./', 'css', 'dist']) ...
+```
 
 ### Caveats
 
-1. Regular expressions of this form `[^, }]+\}` appears to perform less thoroughly in Node.js than in the browser, use the browser-based version of this code for a comprehensive removal of unused styles
-2. A performance drop may be detected by the package for large CSS files of over 1MB, follow the prompts it shows to use an alternative workaround 
+1. Regular expressions, used by the code, that are of this form `[^, }]+\}` appear to perform less thoroughly in Node.js than in the browser, use the browser-based version of this code for a comprehensive removal of unused styles
+
+2. A performance drop may be detected by the package for large CSS files of over 1MB, follow the prompts it shows to use an alternative workaround
 
 
 ### License
