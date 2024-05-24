@@ -1,4 +1,4 @@
-## RemCSS
+## rmrf-css
 
 A much leaner and quicker npm package for trimming unused CSS from CSS files based on the selectors matched in provided HTML files
 
@@ -14,13 +14,13 @@ ___
 #### Via the command line
 + Clone the repository
 ```
-git clone https://github.com/ogbotemi-2000/RemCSS.git
+git clone https://github.com/ogbotemi-2000/rmrf-css.git
 ```
 
 + Or install the package locally via npm
 
 ```
-npm install remcss
+npm install rmrf-css
 ```
 
 _Both options above are quick and direct - the package has zero dependencies, no `npm install` required_
@@ -36,7 +36,7 @@ The section below comprises guides for using the package programatically
 #### As a module
 
 ```js
-const rem_css = require('remcss');
+const rem_css = require('rmrf-css');
 
 rem_css({
   html: /* array of html filenames or a filename */,
@@ -62,7 +62,7 @@ Include the code block below in your `package.json` file for it to work
 ...
   "scripts": {
     ...
-    "remcss": "node ./node_modules/remcss/index"
+    "rmrf-css": "node ./node_modules/rmrf-css/index"
     ...
   }
 ...
@@ -70,20 +70,20 @@ Include the code block below in your `package.json` file for it to work
 
 It is invoked as 
 ```js
-npm run remcss -- -html <html file names or folder path> -css <similar but for css> -out <output folder>
+npm run rmrf-css -- -html <html file names or folder path> -css <similar but for css> -out <output folder>
 ```
-An example - `npm run remcss -- -h 'index.html, sitemap.html' -c public/css -o dist`, the double dashes are required for proper behaviour
+An example - `npm run rmrf-css -- -h 'index.html, sitemap.html' -c public/css -o dist`, the double dashes are required for proper behaviour
 
 
-+ ##### Via `node path/to/remcss/index`
++ ##### Via `node path/to/rmrf-css/index`
 ```js
-node path/to/remcss/index -h index.html -c 'tailwind.css, all.css' -o output-folder
+node path/to/rmrf-css/index -h index.html -c 'tailwind.css, all.css' -o output-folder
 ```
 
 
 The arguments can also be provided in the long version
 ```js
-node path/to/remcss/index.js --html 'index.html, 404.html' --css 'tailwind.css, all.css' -output output-folder
+node path/to/rmrf-css/index.js --html 'index.html, 404.html' --css 'tailwind.css, all.css' -output output-folder
 ```
 
 > The arguments above can be anything, what matters is that their initial letters - 'h', 'c', 'o' as speciified in the `index.js` file remain in the same position:
@@ -108,7 +108,7 @@ Copyright © 2024 [Ogbotemi Akin Ogungbamila](https://github.com/ogbotemi-2000)
 
 ### Discuss
 
-[Discussions are welcome!](https://github.com/ogbotemi-2000/RemCSS/discussions/)
+[Discussions are welcome!](https://github.com/ogbotemi-2000/rmrf-css/discussions/)
 
 ### Contact
 
