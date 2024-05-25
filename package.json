@@ -1,6 +1,6 @@
 {
   "name": "rmrf-css",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A much leaner and quicker npm package for trimming unused CSS from CSS files based on the selectors matched in provided HTML files",
   "main": "index.js",
   "scripts": {
