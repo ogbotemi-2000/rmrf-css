@@ -58,12 +58,12 @@ function init(obj, index, bool, files, rgxes, exists, fileNames=[]) {
   index=0, bool = props.map((key, i, prop, exsts=[], nenoent)=>(Array.isArray(prop=obj[key])&&(exsts=prop.filter(e=>fs.existsSync(e))), nenoent=fs.existsSync(prop), exists.push(exsts.length?exsts:nenoent), exsts+='', obj[key]=exsts?(values[i]=exsts=exsts.split(',')):nenoent&&(values[i]=prop)||values[i], exsts.length||fs.existsSync(prop))).filter(e=>e).length,
   values.slice(0, 2).forEach((value, i)=>{files[value=props[i]] = [], rgxes.push(new RegExp(`\\.${value}$`))});
 
-  if(!bool) console.warn(`Non-existent files detected in the object argument provided to the \`remcss\` module, using ${JSON.stringify(obj)} as a fallback`);
+  if(!bool) console.warn(`Non-existent files detected in the object argument provided to the \`rmrf-css\` module, using ${JSON.stringify(obj)} as a fallback`);
   /** the promise below is used to have a callback for continuation whether the shell - 'ls <directory> -a' is spawned or not. 
     * This is usually when a string or an array of filenames to consider is provided as the values of the 'html' and 'css' propeties of obj
     */
   let getFiles =value=>new Promise((resolve, reject, exit)=>{
-    exit=_=>`::ENOENT:: for the fallback \`${value}\` - cannot continue, exiting the remcss module`;
+    exit=_=>`::ENOENT:: for the fallback \`${value}\` - cannot continue, exiting the rmrf-css module`;
 
     /* (value=values[index]).length below has the ubiquity of being a truthy or falsy for both arrays and strings - convenient */
     if(exists[index]&&(value=values[index]).length&&rgxes[index].test(value)/*is a file*/) resolve([].concat(value));
