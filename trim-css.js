@@ -5,18 +5,11 @@ let fs         = require('fs'),
      * it directly via `node trim-css` is required */
     meta       = 'meta.txt',
     /** uuid for spliting the content of meta when deserializing the stored data in asScript */
-    uid        = '^_^$remcss$^_^';
-
+    uid        = '^_^$rmrf-css$^_^';
 
 function asScript() {
 
-  /* Invoking trimCSS as a function in its file strangely makes it run much faster than if it were required as a module.
-   * Maybe Node.js limits the runtime memory available for modules since they are not expected to serve as
-   * singular-purpose utilities and are not expected to run heavy duty code.
-
-   * This may be a problem that should be discussed with the Node.js community
-
-   * This edge case occurs when the set of attributes - attrs, exceeds 300 in size and the trimmed CSS file is close to or over 1 MB in size
+  /* Will be used as an alternative when the code is right
    */
   fs.readFile(meta, (err, buffer)=>{  
     buffer = (buffer=buffer.toString()).split(uid)
@@ -29,7 +22,24 @@ module.exports = trimCSS, require.main===module&&asScript();
 
 function trimCSS(attrs, files, outDir, i, end, rerun, matches=new Set, comments=[], css='', ruleEnd, used='', generic='', rkeys, file, vw_breaks, styles, fn, endDump={}, dump={}) {
 
-     i||=0 /*only make i zero if it is a falsy*/
+/*the operation just below is particularly revolutionary in its consequence on the performance of this code and thus deserves this long comment.
+This code had formerly provided an alternative of invoking asScript() where required, to what seemed like a performance slowdown of over 5 seconds for large CSS files of over 1-2MB.
+The so-called alternative ended the code and prompted the user to directly invoke this script as `node path/to/script` in a [now wrong] guess that Node.js offered more 
+runtime memory to directly invoked scripts than it does modules...
+
+It is clear now that empty strings in the Set of detected selectors - attrs added greatly to the time complexity of this code and made it slow, hence why they are removed via .filter() below
+The 'alternative' will be left where it is for reference purposes - the condition for its usage is never expected to be true because it ends up doing the same thing.
+
+Should it ever be promted for by this code then please provide details such as the number of classes (the programs tells you) you are trimming against as a discussion
+at https://github.com/ogbotemi-2000/rmrf-css/discussions/, it is not an issue.
+
+
+^_^
+
+*/
+     attrs = new Set([...attrs].filter(e=>e)),
+
+     i||=0 /*only make i zero if it is a falsy, this is usually for when asScript above calls this script*/
     /** vw_breaks may be provided by the user when the normal media query matching preset below fails to put utility media query selectors in their media query breakpoints */
     rkeys = new RegExp('('+Object.keys(vw_breaks = {base:500,sm:640,md:768,lg:1024,xl:1280, '32xl':1536}).join('|')+')\\\\:'),
 
@@ -55,11 +65,11 @@ function trimCSS(attrs, files, outDir, i, end, rerun, matches=new Set, comments=
 
     fn=()=>{
 
-      /** added a newline to the end of the stylesheet to accommodate adding closing braces for @-rules whose closing braces ends the string */
+      /** added a newline to the end of the stylesheet to accommodate adding closing braces for @-rules whose closing braces ends the string of styles */
       generic='', used='', css='', styles = fs.readFileSync(file=files[i++]).toString()+'\n';
-      console.log('::TRIMMING::', file, 'against', attrs.size, 'detected selectors');
+      console.log('::TRIMMING::', file, 'against', attrs.size, 'detected unique selectors');
 
-      let _canAdd=!0, canAdd=!0, at_rule, media_ru index=0, keepIndex=0, len=styles.length; each = styles.charAt(index); index<len,
+      let _canAdd=!0, canAdd=!0, at_rule, media_rule, index=0, keepIndex=0, len=styles.length; each = styles.charAt(index); index<len,
       /** the callback: _cb is used by back and forward to loop over the stylesheet at the current index until
       * its start or until either an opening or closing curly brace is encountered
       */
@@ -73,14 +83,16 @@ function trimCSS(attrs, files, outDir, i, end, rerun, matches=new Set, comments=
        * It is in bytes per run and defaults to 1. It may be left as is below as a default or exposed as `--boost <N>`
        */
         for(let t, jump=0, boost=500000; jump<boost&&(each = styles.charAt(index)); jump++) {
-          /* After over 5s slowdown of runtime when boosting, end the loop and advise the user to manually run the algorithm as a workaround to a performance drop quirk intrinsic to scripts required as a module in Node.js */
+	  // Psst: the condition below is not normally expected to be true... 
+          /* After over 5s slowdown of runtime when boosting, end the loop and advise the user to manually run the algorithm to implement a workaround*/
           if((t=new Date-slowT)>5765) {
             let metadata = `${[...attrs].join(',')}${uid}${files}${uid}${outDir}${uid}${i-1}`;
 
             fs.writeFile(meta, metadata, err=>{
 	      if(err) throw err;
-              console.warn('-'.repeat(30)+`\n::[SLOWDOWN]:: Algorithm taking over <5 seconds> between boosts.\nPlease run "node ${require.main.children[0].filename}" directly as a workaround to a detected performance slowdown that has been observed to occur when 'require'd scripts - modules, run timely code in Node.js.
-Not to worry the arguments you provided before are temporary persisted on the disk and will be used when you run "node trim-css"\n`+'-'.repeat(30))
+
+              console.warn('-'.repeat(30)+`\n::[SLOWDOWN]:: Algorithm taking over <5 seconds> between boosts.\nPlease run "node ${path.join(__dirname, 'trim-css')}" directly as a workaround to a detected performance slowdown that has been observed to occur when 'require'd scripts - modules, run timely code in Node.js.
+Not to worry the arguments you provided before are temporary persisted on the disk and will be used.\n`+'-'.repeat(30))
 	    }), jump=boost, index=len, i = files.length;
             return;
           }
@@ -197,9 +209,7 @@ Not to worry the arguments you provided before are temporary persisted on the di
     fn()
   }
 
-  /** looks ahead about twice or thrice to know when a closing curly brace has another after it.
-   * The condition for the loop terminates when a non-whitespace character like '}' is encountered after the first closing brace
-   */
+/*sends a flag to know whether the current index of styles is in a comment or not */
 const notComment=(styles, index)=>{
   notComment._canAdd===void 0 &&(notComment._canAdd=true);
   switch(loop(styles, {from:index, to:2})[0]) {
@@ -207,7 +217,11 @@ const notComment=(styles, index)=>{
     case '*/': notComment._canAdd=!0; break;
   }
   return notComment._canAdd
-}, atRuleEnd=(styles, index, exit_rule, res='', arr)=>(arr = loop(styles, { from:index, cb:(s,f, t, bool)=>(bool=!(t=s[++index]||s[--index]).match(/\s/), res+=s[f], exit_rule=t==='}', bool)}), [exit_rule, index, res]);
+}, 
+  /** looks ahead about twice or thrice to know when a closing curly brace has another after it.
+   * The condition for the loop terminates when a non-whitespace character like '}' is encountered after the first closing brace
+   */
+atRuleEnd=(styles, index, exit_rule, res='', arr)=>(arr = loop(styles, { from:index, cb:(s,f, t, bool)=>(bool=!(t=s[++index]||s[--index]).match(/\s/), res+=s[f], exit_rule=t==='}', bool)}), [exit_rule, index, res]);
 
 /** The most important function in this codebase.
  * Used to use a for loop imperatively to loop over strings either forwards or backwards

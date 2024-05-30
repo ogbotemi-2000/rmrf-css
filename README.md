@@ -1,4 +1,4 @@
-## rmrf-css
+## rmrf-css	
 
 A much leaner and quicker npm package for trimming unused CSS from CSS files based on the selectors matched in provided HTML files
 
@@ -7,7 +7,7 @@ A much leaner and quicker npm package for trimming unused CSS from CSS files bas
 
 
 #### Browser-based
-Head over to [https://rem-css.infinityfreeapp.com](https://rem-css.infinityfreeapp.com) for a more comprehensive, simple, UI-based trimming and downloading of used styles for your provided website URL.
+Head over to [https://rmrf-css.vercel.app](https://rmrf-css.vercel.app) for a more comprehensive, simple, UI-based trimming and downloading of used styles for your provided website URL.
 
 ___
 
@@ -46,7 +46,7 @@ rem_css({
 })
 
 /* defaults to {html:'./', css:'css', out:'dist'}.
- * 'dist' is created if it does not exist
+ * the output directory is created if it does not exist
  */
 rem_css()
 
@@ -92,11 +92,22 @@ node path/to/rmrf-css/index.js --html 'index.html, 404.html' --css 'tailwind.css
 ... argv(['-h', '-c', '-o'], ['./', 'css', 'dist']) ...
 ```
 
-### Caveats
+### Awareness
 
 1. Regular expressions, used by the code, that are of this form `[^, }]+\}` appear to perform less thoroughly in Node.js than in the browser, use the browser-based version of this code for a comprehensive removal of unused styles
 
-2. A performance drop may be detected by the package for large CSS files of over 1MB, follow the prompts it shows to use an alternative workaround
+2. The code overtly stops and states its reason if it takes over 5765ms when boosting the trimming operation.
+This happens when the number of unique selectors to be audited is great and it is done to avoid long-running behaviour that produces unwanted results.
+If such edge case happens, a workaround is in the works and it is open to [discussion](https://github.com/ogbotemi-2000/rmrf-css/discussions/)
+
+3. Modifying the performance threshold time or the "boost" mentioned above may follow this proprotion: 
+```
+50,0000 bytes per run as boost[default]  ≡  (Should take at most 5765ms)
+<New bytes per run via for loop> 	 ≡  <New threshold time>
+
+Assume any value you want for either unknown above and cross-multiply, solve to obtain other unknown
+
+````
 
 
 ### License

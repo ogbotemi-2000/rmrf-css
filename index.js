@@ -24,7 +24,8 @@ let fs         = require('fs'),
 
 /*
 The codes below up to module.exports = init is for receiving user input.
-You may comment it up to that point and call init({html:<string>, css:<string>, out:<string>}) if command-line use is not an option
+You may comment it up to that point and either require this script as a module or
+call init({html:<string>, css:<string>, out:<string>}) if command-line use is not an option
 */
 
 let fromCmdLine = process.argv.slice(2).length, values,
