@@ -1,6 +1,6 @@
 {
   "name": "rmrf-css",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A lean and thorough npm package for trimming unused CSS from CSS files based on the selectors matched in provided HTML files",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,11 @@
     "page speed insight",
     "zero dependency", "reduce css styles"
   ],
-  "author": "Ogbotemi Akin Ogungbamila",
+  "homepage": "https://rmrf-css.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ogbotem-2000/rmrf-css.git"
+  },
+  "author": "Ogbotemi Akin Ogungbamila (https://github.com/ogbotemi-2000)",
   "license": "EUPL"
 }
