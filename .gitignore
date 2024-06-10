@@ -3,3 +3,5 @@ dist
 *.txt
 *.html
 
+private.js
+css

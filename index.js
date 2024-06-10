@@ -1,25 +1,41 @@
-let fs         = require('fs'),
-    path       = require('path'),
+let fs           = require('fs'),
+    path         = require('path'),
+    isWindows    = /^win[0-9]*/i.test(require('os').platform()),
     {exec,
-    execFile} = require('child_process'),
-    attrs      = new Set(['']/**you may leave an array classes or ids used in scripts here - [<class>, <id>]*/),
-    index      = 0,
-    trimCSS    = require('./trim-css'),
-    argv       = require('./argv'),
-    fxn        = (nxt, files, outDir)=>fs.readFile(files.html[nxt], function(err, buf, buffer) {
-      (buffer = buf.toString())
-      .replace(/(id|class)="[^"]+"/g, e=>{
-        (e.replace(/(id|class)=|"/g, '').split(' ')).forEach((m, el)=>{
-          /** escape unusual strings or starting numbers in css selectors */
-          m=m.replace('&amp;', '&').replace(/^[0-9]+|\.|\/|\[|\]|\&|\*|\:|\>/g, e=>'\\'+e);
-            m.trim()&&attrs.add(m)
+    execFile}    = require('child_process'),
+    /** the empty whitespace element in the array below is the culprit for the performance drop in earlier versions.
+     * The long comment in the trim-css.js file is not removed
+     */
+    selectors    = new Set([]/**you may fill this array with strings of classes and ids */),
+    index        = 0,
+    trimCSS      = require('./trim-css'),
+    {argv, loop} = require('./argv'),
+    fxn          = (nxt, files, outDir)=>fs.readFile(files.html[nxt], function(err, buf, html, attrs, attr_vals=[]) {
+      attrs = ['class', 'id'];/* add the name of attributes you believe to store used selectors here */
+
+      for(let i=0, j=(html = buf.toString()).length, res; i<j; i++) {
+        /** Node.js sucks at the precision and accuracy of the regular expressions used to get the values of attributes such as
+         * `class` or `id`, hence why a loop is used imperatively to their values as their patterns are sometimes close  to
+         * being non-regular expressions.
+         * See the previous versions of this package for context
+         */
+        attrs.forEach(attr=>{
+          /* store strings for the length of the current attr and see whether they are the same */
+          if(new RegExp(`${attr}=('|")`).test((res = loop(html, {from:i, to:attr.length+2}))[0])) {
+            /* the current index points to an opening quote, incrementing it points to the characters after it which are then
+               added together till the character just before the closing quote
+            */
+            // attr_vals = attr_vals.concat
+            (loop(html, {from:res[1]+1, cb:(s,f)=>/'|"/.test(s[f])})[0].split(/\s/)).forEach(val=>(val = val.trim())&&selectors.add(val.replace(/^[0-9]+|\.|\/|\[|\]|\&|\*|\:|\>/g, e=>'\\'+e)))
+            
+          }
         })
-      }),
+      };
       /** using setImmediate to call this function in itself to avoid
      * the maximum call stack size exceeded error which may occur for directories
      * containing a lot of HTML or CSS files
      */
-      index<files.html.length?setImmediate(_=>fxn(index++, files, outDir)):trimCSS(attrs, files.css, outDir)
+      files.html[++index] ? setImmediate(_=>fxn(index, files, outDir)) : trimCSS(selectors, files.css, outDir)
   });
 
 /*
@@ -48,12 +64,14 @@ fromCmdLine&&init(args)
 
 module.exports = init;
 
-function init(obj, index, bool, files, rgxes, exists, fileNames=[]) {
+function init(obj, outDir, index, bool, files, rgxes, exists, fileNames=[]) {
   files={}, rgxes=[], exists=[],
 
   /* for when obj is null */ obj||={},
   /* heads up, typeof null equals 'object' hence why the above logical assignment is there*/
-  typeof obj!=='object'&&(obj={}),
+  typeof obj!=='object'&&(obj={}), outDir = (obj[props[2]]||'dist').split(/(\/|\\)+/).slice(0, -1),
+  /** write to dist in the root of the  path provided if its specified folder is non-existent */
+  (!fs.existsSync(obj[props[2]])&&!fs.existsSync(obj[props[2]] = path.join(...outDir, 'dist')))&&fs.mkdirSync(obj[props[2]]),
 
   index=0, bool = props.map((key, i, prop, exsts=[], nenoent)=>(Array.isArray(prop=obj[key])&&(exsts=prop.filter(e=>fs.existsSync(e))), nenoent=fs.existsSync(prop), exists.push(exsts.length?exsts:nenoent), exsts+='', obj[key]=exsts?(values[i]=exsts=exsts.split(',')):nenoent&&(values[i]=prop)||values[i], exsts.length||fs.existsSync(prop))).filter(e=>e).length,
   values.slice(0, 2).forEach((value, i)=>{files[value=props[i]] = [], rgxes.push(new RegExp(`\\.${value}$`))});
@@ -75,8 +93,11 @@ function init(obj, index, bool, files, rgxes, exists, fileNames=[]) {
 
       /*reject and exit obtaining the necessary files if the fallbacks do not exist*/
       if(!fs.existsSync(value)) {reject(exit()); return}
-      /* using exec to overcome issues with Windows terminal */
-      exec('ls '+value, (error, stdout, stderr, dir) => {
+      /* using dir in place of ls, changing the forward slashes in file paths to reverse slashes and using exec in lieu of execFile all to
+        overcome"Command failed: ls ...", "Parameter format not correct" and "spawn ... ENOENT" issues respectively with the Windows terminal 
+       */
+      value = isWindows?value.replace(/\//g, '\\'):value,
+      exec((isWindows?'dir ':'ls ')+value, (error, stdout, stderr, dir) => {
         if (error) console.warn(/*throw */error) /* a warning instead of 'throw'ing this error */;
 
 	/* split and filter strings that match this regex /\.css$/ or /\.html$/.

@@ -94,16 +94,17 @@ node path/to/rmrf-css/index.js --html 'index.html, 404.html' --css 'tailwind.css
 
 ### Awareness
 
-1. Regular expressions, used by the code, that are of this form `[^, }]+\}` appear to perform less thoroughly in Node.js than in the browser, use the browser-based version of this code for a comprehensive removal of unused styles
 
-2. The code overtly stops and states its reason if it takes over 5765ms when boosting the trimming operation.
+1. The code warns with a message when it takes over 6000ms when boosting the trimming operation.
 This happens when the number of unique selectors to be audited is great and it is done to avoid long-running behaviour that produces unwanted results.
-If such edge case happens, a workaround is in the works and it is open to [discussion](https://github.com/ogbotemi-2000/rmrf-css/discussions/)
+If such edge case happens and it seems to be inconvenient to you, please discuss the workarounds it suggests [here](https://github.com/ogbotemi-2000/rmrf-css/discussions/)
 
-3. Modifying the performance threshold time or the "boost" mentioned above may follow this proprotion: 
+2. Such a workaround for the edge case mentioned above will involve breaking the detected unique selectors into smaller chunks and invoking the scripts directly thereof with the last provided arguments used.
+
+3. Modifying the performance threshold time of 6000ms or the "boost" mentioned above may follow this proprotion: 
 ```
-50,0000 bytes per run as boost[default]  ≡  (Should take at most 5765ms)
-<New bytes per run via for loop> 	 ≡  <New threshold time>
+[Defaults] 500,000 bytes per cycle as boost  ≡  (Should take at most 6000ms)
+<New bytes per run via for loop> 	           ≡  <New threshold time>
 
 Assume any value you want for either unknown above and cross-multiply, solve to obtain other unknown
 

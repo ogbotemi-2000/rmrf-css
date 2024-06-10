@@ -1,6 +1,6 @@
 let {exec, execFile, spawn} = require('child_process');
 
-exec('dir dist', (err, stdout, stderr, arr=[])=>{ 
+exec('dir ..\\rmrf-css-client\\css', (err, stdout, stderr, arr=[])=>{ 
   if(err||stderr) console.error('An error occured', err, stderr);
 
   stdout.replace(/\s[^]+\.(html|css)/g, str=>{
