@@ -1,6 +1,6 @@
 ## rmrf-css	
 
-A much leaner and quicker npm package for trimming unused CSS from CSS files based on the selectors matched in provided HTML files
+A much leaner and thorough npm package for trimming unused CSS from CSS files based on the selectors matched in provided HTML files
 
 
 ### Getting Started
